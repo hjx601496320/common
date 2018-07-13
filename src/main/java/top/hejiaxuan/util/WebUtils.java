@@ -2,10 +2,6 @@ package top.hejiaxuan.util;
 
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.DocumentHelper;
-import org.dom4j.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,9 +16,9 @@ import java.util.*;
 /**
  * Created by hjx on 2017/8/10.
  */
-public class WebUrils {
+public class WebUtils {
 
-    static Logger logger = LoggerFactory.getLogger(WebUrils.class);
+    static Logger logger = LoggerFactory.getLogger(WebUtils.class);
 
     public enum Content_Type {
         FORM, XML, JSON
@@ -73,7 +69,6 @@ public class WebUrils {
         return null;
     }
 
-
     /**
      * 读取请求中的参数
      *
@@ -108,7 +103,6 @@ public class WebUrils {
         return body.toString();
     }
 
-
     /**
      * 将xml 转换为map
      *
@@ -116,23 +110,7 @@ public class WebUrils {
      * @return
      */
     public static Map<String, String> parseXmlToMap(String xml) {
-
-        Map<String, String> map = new TreeMap<>();
-        try {
-            Document document = DocumentHelper.parseText(xml);
-            Element root = document.getRootElement();
-            Iterator<Element> rootItor = root.elementIterator();
-            Map<String, Object> rsltMap = null;
-            while (rootItor.hasNext()) {
-                Element tmpElement = rootItor.next();
-                String name = tmpElement.getName();
-                String value = tmpElement.getStringValue();
-                map.put(name, value);
-            }
-        } catch (DocumentException e) {
-            e.printStackTrace();
-        }
-        return map;
+        return XMLUtil.toMap(xml);
     }
 
     /**
@@ -145,6 +123,5 @@ public class WebUrils {
         HashMap<String, String> hashMap = JSONObject.parseObject(json, HashMap.class);
         return hashMap;
     }
-
 
 }

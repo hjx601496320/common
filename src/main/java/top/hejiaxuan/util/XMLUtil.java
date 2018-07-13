@@ -4,22 +4,50 @@ import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-
+import java.util.TreeMap;
 
 /**
- * <P>Description: XML转换工具</P>
- *
- * @author 张璞 puzhanga@isoftstone.com  2016年10月20日 下午7:24:03
- * @ClassName: XMLUtil
- * @see
+ * xml转换工具
  */
 public class XMLUtil {
 
+    /**
+     * 防止
+     * 暴露的XML外部实体注入漏洞(XML External Entity Injection，简称 XXE)
+     */
+    static DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+
+    static {
+        Map<String, Boolean> FEATURE_MAP = new HashMap() {{
+            put("http://apache.org/xml/features/disallow-doctype-decl", true);
+            put("http://xml.org/sax/features/external-general-entities", false);
+            put("http://xml.org/sax/features/external-parameter-entities", false);
+            put("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        }};
+        for (Map.Entry<String, Boolean> entry : FEATURE_MAP.entrySet()) {
+            try {
+                documentBuilderFactory.setFeature(entry.getKey(), entry.getValue());
+            } catch (ParserConfigurationException e) {
+                e.printStackTrace();
+            }
+        }
+        documentBuilderFactory.setXIncludeAware(false);
+        documentBuilderFactory.setExpandEntityReferences(false);
+    }
 
     /**
      * map to xml
@@ -57,26 +85,28 @@ public class XMLUtil {
      * @return
      */
     public static Map<String, String> toMap(String xml) {
-        Map<String, String> map = new HashMap<>();
-        Document document = null;
+        Map<String, String> map = new TreeMap<>();
         try {
-            document = DocumentHelper.parseText(xml);
-        } catch (DocumentException e) {
+            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            org.w3c.dom.Document document = documentBuilder.parse(new ByteArrayInputStream(xml.getBytes()));
+            Node root = document.getFirstChild();
+            NodeList childNodes = root.getChildNodes();
+            for (int i = 0; i < childNodes.getLength(); i++) {
+                Node item = childNodes.item(i);
+                if (item instanceof Element) {
+                    String nodeName = item.getNodeName();
+                    String nodeValue = item.getTextContent();
+                    map.put(nodeName, nodeValue);
+                }
+            }
+        } catch (IOException e) {
             e.printStackTrace();
-        }
-        if (document == null) {
-            return map;
-        }
-        org.dom4j.Element root = document.getRootElement();
-        Iterator<org.dom4j.Element> rootItor = root.elementIterator();
-        while (rootItor.hasNext()) {
-            org.dom4j.Element tmpElement = rootItor.next();
-            String name = tmpElement.getName();
-            String value = tmpElement.getStringValue();
-            map.put(name, value);
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
         }
         return map;
     }
-
 
 }
