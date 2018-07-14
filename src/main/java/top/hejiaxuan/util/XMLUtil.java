@@ -1,9 +1,7 @@
 package top.hejiaxuan.util;
 
 import org.apache.commons.lang3.StringUtils;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.DocumentHelper;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -14,7 +12,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -32,18 +29,13 @@ public class XMLUtil {
     static DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
 
     static {
-        Map<String, Boolean> FEATURE_MAP = new HashMap() {{
-            put("http://apache.org/xml/features/disallow-doctype-decl", true);
-            put("http://xml.org/sax/features/external-general-entities", false);
-            put("http://xml.org/sax/features/external-parameter-entities", false);
-            put("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-        }};
-        for (Map.Entry<String, Boolean> entry : FEATURE_MAP.entrySet()) {
-            try {
-                documentBuilderFactory.setFeature(entry.getKey(), entry.getValue());
-            } catch (ParserConfigurationException e) {
-                e.printStackTrace();
-            }
+        try {
+            documentBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            documentBuilderFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            documentBuilderFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            documentBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
         }
         documentBuilderFactory.setXIncludeAware(false);
         documentBuilderFactory.setExpandEntityReferences(false);
@@ -88,9 +80,9 @@ public class XMLUtil {
         Map<String, String> map = new TreeMap<>();
         try {
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-            org.w3c.dom.Document document = documentBuilder.parse(new ByteArrayInputStream(xml.getBytes()));
-            Node root = document.getFirstChild();
-            NodeList childNodes = root.getChildNodes();
+            Document document = documentBuilder.parse(new ByteArrayInputStream(xml.getBytes()));
+            Element element = document.getDocumentElement();
+            NodeList childNodes = element.getChildNodes();
             for (int i = 0; i < childNodes.getLength(); i++) {
                 Node item = childNodes.item(i);
                 if (item instanceof Element) {
