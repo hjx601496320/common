@@ -59,11 +59,11 @@ public class XMLUtil {
             if (StringUtils.isBlank(value)) {
                 continue;
             }
-            sb.append("<").append(entry.getKey()).append(">");
+            sb.append("<").append(key).append(">");
             sb.append("<![CDATA[");
             sb.append(entry.getValue());
             sb.append("]]>");
-            sb.append("</").append(entry.getKey()).append(">");
+            sb.append("</").append(key).append(">");
             sb.append("\n");
         }
         sb.append("</xml>");
@@ -78,27 +78,33 @@ public class XMLUtil {
      */
     public static Map<String, String> toMap(String xml) {
         Map<String, String> map = new TreeMap<>();
-        try {
-            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-            Document document = documentBuilder.parse(new ByteArrayInputStream(xml.getBytes()));
-            Element element = document.getDocumentElement();
-            NodeList childNodes = element.getChildNodes();
-            for (int i = 0; i < childNodes.getLength(); i++) {
-                Node item = childNodes.item(i);
-                if (item instanceof Element) {
-                    String nodeName = item.getNodeName();
-                    String nodeValue = item.getTextContent();
-                    map.put(nodeName, nodeValue);
-                }
+        Document document = getDocument(xml);
+        Element element = document.getDocumentElement();
+        NodeList childNodes = element.getChildNodes();
+        for (int i = 0; i < childNodes.getLength(); i++) {
+            Node item = childNodes.item(i);
+            if (item instanceof Element) {
+                String nodeName = item.getNodeName();
+                String nodeValue = item.getTextContent();
+                map.put(nodeName, nodeValue);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-        } catch (SAXException e) {
-            e.printStackTrace();
         }
         return map;
     }
 
+    public static Document getDocument(String xml) {
+        DocumentBuilder documentBuilder = null;
+        try {
+            documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            Document document = documentBuilder.parse(new ByteArrayInputStream(xml.getBytes()));
+            return document;
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

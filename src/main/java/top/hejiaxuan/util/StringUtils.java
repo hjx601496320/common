@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
-public class StringUtils {
+public class StringUtils  {
 
     public static final String SPACE = " ";
 
