@@ -2,11 +2,13 @@ package top.hejiaxuan.util;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
+import org.dom4j.DocumentException;
 import org.dom4j.DocumentFactory;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 
@@ -36,8 +38,6 @@ public class CodeUtils {
         int times = 0;
         for (char aChar : chars) {
             switch (aChar) {
-//                case '\n':
-//                    break;
                 case '{':
                 case '[':
                     times++;
@@ -59,17 +59,26 @@ public class CodeUtils {
         return after.toString();
     }
 
-    public static String xmlFormat(String str) throws Exception {
-        SAXReader reader = new SAXReader();
-        StringReader in = new StringReader(str);
-        Document doc = reader.read(in);
-        OutputFormat formater = OutputFormat.createPrettyPrint();
-        formater.setEncoding("utf-8");
-        StringWriter out = new StringWriter();
-        XMLWriter writer = new XMLWriter(out, formater);
-        writer.write(doc);
-        writer.close();
-        return out.toString();
+    public static String xmlFormat(String str) {
+        XMLWriter writer = null;
+        Document doc = null;
+        try {
+            SAXReader reader = new SAXReader();
+            StringReader in = new StringReader(str);
+            doc = reader.read(in);
+            OutputFormat formater = OutputFormat.createPrettyPrint();
+            formater.setEncoding("utf-8");
+            StringWriter out = new StringWriter();
+            writer = new XMLWriter(out, formater);
+            writer.write(doc);
+            writer.close();
+            return out.toString();
+        } catch (DocumentException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }
