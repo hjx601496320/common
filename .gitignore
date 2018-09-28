@@ -25,3 +25,5 @@ hs_err_pid*
 util\.iml
 
 target/
+
+common\.iml
